@@ -11,18 +11,18 @@
 ## author:       jonas@sfxonline.de
 ## =======================================================================
 
-tmpfile=$(mktemp $1.XXX.txt)
-xmlstarlet sel -t -v '//*[local-name()="loc"]' $1 | sed 's/ *//g' >  $tmpfile
-echo "" >> $tmpfile
+tmpfile=$(mktemp "$1".XXX.txt)
+xmlstarlet sel -t -v '//*[local-name()="loc"]' "$1" | sed 's/ *//g' >  "$tmpfile"
+echo "" >> "$tmpfile"
 
 while read p; do
   status=""
-  status=$(curl -s -o /dev/null -w "%{http_code}" $p)
+  status=$(curl -s -o /dev/null -w "%{http_code}" "$p")
   echo -n "["
-  echo -n $status
+  echo -n "$status"
   echo -n "] "
   echo -n "$p"
   echo ""
-done < $tmpfile
+done < "$tmpfile"
 
-rm $tmpfile
+rm "$tmpfile"

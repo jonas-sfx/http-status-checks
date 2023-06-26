@@ -13,17 +13,17 @@
 ## author:       jonas@sfxonline.de
 ## =======================================================================
 
-tmpfile=$(mktemp $1.XXX.txt)
-tmpxml=$(mktemp $1.XXX.xml)
+tmpfile=$(mktemp "$1".XXX.txt)
+tmpxml=$(mktemp "$1".XXX.xml)
 
-xmlstarlet sel -t -v '//*[local-name()="loc"]' $1 | sed 's/ *//g' >  $tmpfile
-cp $1 $1.200.xml
+xmlstarlet sel -t -v '//*[local-name()="loc"]' "$1" | sed 's/ *//g' >  "$tmpfile"
+cp "$1" "$1".200.xml
 
 while read p; do
   status=""
-  status=$(curl -s -o /dev/null -w "%{http_code}" $p)
+  status=$(curl -s -o /dev/null -w "%{http_code}" "$p")
 
-  if [ $status -eq 200 ]; then
+  if [ "$status" -eq 200 ]; then
     echo "[200 ✅] $p"
   else
     echo "[$status ⚡] $p"
@@ -31,6 +31,6 @@ while read p; do
     mv $tmpxml $1.200.xml
     
   fi
-done < $tmpfile
+done < "$tmpfile"
 
-rm $tmpfile
+rm "$tmpfile"

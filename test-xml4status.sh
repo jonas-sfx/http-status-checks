@@ -11,18 +11,24 @@
 ## author:       jonas@sfxonline.de
 ## =======================================================================
 
-tmpfile=$(mktemp "$1".XXX.txt)
-xmlstarlet sel -t -v '//*[local-name()="loc"]' "$1" | sed 's/ *//g' >  "$tmpfile"
-echo "" >> "$tmpfile"
+input_file="$1"
+tmpfile=$(mktemp "$input_file.XXX.txt")
 
-while read p; do
-  status=""
-  status=$(curl -s -o /dev/null -w "%{http_code}" "$p")
-  echo -n "["
-  echo -n "$status"
-  echo -n "] "
-  echo -n "$p"
-  echo ""
-done < "$tmpfile"
+if xmlstarlet sel -t -m '//*[local-name()="loc" or local-name()="link"]' -v 'normalize-space(.)' "$input_file" | sed 's/ *//g' | sort -u > "$tmpfile"; then
+  echo "$input_file is not a Sitemap-Index. I am fine with that."
 
-rm "$tmpfile"
+  # write found urls in tmp-file
+  xmlstarlet sel -t -v '//*[local-name()="loc" or local-name()="link"]' -v 'normalize-space(.)' "$input_file" | sed 's/ *//' | sort -u > "$tmpfile"
+
+  while IFS= read -r p; do
+    if [ -z "$p" ]; then
+      continue
+    fi
+    status=$(curl -s -o /dev/null -w "%{http_code}" "$p")
+    printf "[%s] %s\n" "$status" "$p"
+  done < "$tmpfile"
+
+  rm "$tmpfile"
+else
+  echo "$input_file is a Sitemap-Index. I need the Sitemap itself."
+fi
